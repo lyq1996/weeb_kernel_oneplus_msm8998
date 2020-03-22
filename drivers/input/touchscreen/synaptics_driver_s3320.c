@@ -4964,15 +4964,9 @@ static int synaptics_ts_probe(struct i2c_client *client,
 	TPD_ERR("synaptic:ts->irq is %d\n", ts->irq);
 
 	ret = request_threaded_irq(ts->irq, NULL,
-<<<<<<< HEAD
 				   synaptics_irq_thread_fn,
 				   ts->irq_flags | IRQF_ONESHOT | IRQF_PERF_CRITICAL,
 				   TPD_DEVICE, ts);
-=======
-			synaptics_irq_thread_fn,
-			ts->irq_flags | IRQF_ONESHOT | IRQF_PERF_CRITICAL,
-			TPD_DEVICE, ts);
->>>>>>> c51259667911... Revert "treewide: remove perf critical patchset"
 	if (ret < 0)
 		TPD_ERR("%s request_threaded_irq ret is %d\n", __func__, ret);
 	msleep(20);
