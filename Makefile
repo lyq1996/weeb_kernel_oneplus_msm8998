@@ -623,6 +623,15 @@ endif
 GCC_TOOLCHAIN_DIR := $(dir $(shell which $(CROSS_COMPILE)elfedit))
 CLANG_PREFIX	:= --prefix=$(GCC_TOOLCHAIN_DIR)
 GCC_TOOLCHAIN	:= $(realpath $(GCC_TOOLCHAIN_DIR)/..)
+KBUILD_CFLAGS  += -mcpu=cortex-a53 -mtune=cortex-a53
+KBUILD_CFLAGS  += $(call cc-option, -mllvm -polly) \
+                  $(call cc-option, -mllvm -polly-run-dce) \
+                  $(call cc-option, -mllvm -polly-run-inliner) \
+                  $(call cc-option, -mllvm -polly-opt-fusion=max) \
+                  $(call cc-option, -mllvm -polly-ast-use-context) \
+                  $(call cc-option, -mllvm -polly-detect-keep-going) \
+                  $(call cc-option, -mllvm -polly-vectorizer=stripmine) \
+                  $(call cc-option, -mllvm -polly-invariant-load-hoisting)
 endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_GCC_TC	:= --gcc-toolchain=$(GCC_TOOLCHAIN)
