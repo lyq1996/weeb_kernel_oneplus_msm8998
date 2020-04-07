@@ -39,6 +39,7 @@ struct mdp_dither_data_v1_7 *dither_payload;
 u32 copyback = 0;
 u32 dither_copyback = 0;
 static u32 backlight = 0;
+static u32 MIN_SCALE_COMPENSATION = 0;
 static const u32 pcc_depth[9] = {128,256,512,1024,2048,4096,8192,16384,32768};
 static u32 depth = 8;
 static bool pcc_enabled = false;
@@ -105,8 +106,8 @@ static int fliker_free_push_pcc(int temp)
 
 static int set_brightness(int backlight)
 {
-    int temp = backlight * (MAX_SCALE - MIN_SCALE) / elvss_off_threshold + MIN_SCALE;
-	temp = clamp_t(int, temp, MIN_SCALE, MAX_SCALE);
+    int temp = backlight * (MAX_SCALE - MIN_SCALE - MIN_SCALE_COMPENSATION) / elvss_off_threshold + MIN_SCALE + MIN_SCALE_COMPENSATION;
+	temp = clamp_t(int, temp, MIN_SCALE + MIN_SCALE_COMPENSATION, MAX_SCALE);
 	for (depth = 8;depth >= 1;depth--){
 		if(temp >= pcc_depth[depth]) break;
 	}
@@ -119,6 +120,9 @@ u32 mdss_panel_calc_backlight(u32 bl_lvl)
 	if (mdss_backlight_enable && bl_lvl != 0 && bl_lvl < elvss_off_threshold) {
         pr_debug("fliker free mode on\n");
 		pr_debug("elvss_off = %d, backlight_level = %d\n", elvss_off_threshold,bl_lvl);
+		MIN_SCALE_COMPENSATION = bl_lvl*(MIN_SCALE * 10 / elvss_off_threshold);
+		if(MIN_SCALE_COMPENSATION > 5120)
+			MIN_SCALE_COMPENSATION = 5120;
 		if(!set_brightness(bl_lvl))
 			return elvss_off_threshold;
 	}else{
